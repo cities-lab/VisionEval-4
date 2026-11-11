@@ -12,6 +12,34 @@ The Pixi workspace targets Linux x86-64, macOS x86-64, and macOS Apple silicon.
 The lockfile requires Linux with glibc 2.28 or newer and kernel 4.18 or newer,
 or macOS 13 or newer.
 
+## Get the source
+
+Use the repository's `release` branch, which contains the Pixi workflow described
+here.
+
+### Clone with Git
+
+Follow GitHub's guide to [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository),
+or run:
+
+```sh
+git clone --branch release https://github.com/cities-lab/VisionEval-4.git
+cd VisionEval-4
+```
+
+### Download a ZIP
+
+Follow GitHub's guide to [download source code archives](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives),
+select the `release` branch, and extract the archive. Or download the
+[release branch ZIP](https://github.com/cities-lab/VisionEval-4/archive/refs/heads/release.zip)
+directly. Open a terminal in the extracted `VisionEval-4-release` folder, which
+contains `pixi.toml`.
+
+Run the Pixi commands below from the repository root (`VisionEval-4` for the
+Git clone, or `VisionEval-4-release` for the ZIP).
+
+## Install with Pixi
+
 Install Pixi using the [official installation instructions](https://pixi.sh/latest/installation/),
 then, from the repository root, run:
 
