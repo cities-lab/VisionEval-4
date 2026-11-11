@@ -45,7 +45,7 @@ Git clone, or `VisionEval-4-release` for the ZIP).
 ## Install with Pixi
 
 Install Pixi using the [official installation instructions](https://pixi.sh/latest/installation/),
-then, from the repository root, run:
+then, from the VisionEval-4 repository root, run:
 
 ```sh
 pixi install --locked
@@ -85,3 +85,8 @@ SDK in addition to the compiler toolchain supplied by Pixi.
 
 Source installation and runtime checks passed on Linux. The macOS lock resolved,
 but the runtime has not been tested there.
+
+## Use RStudio with Pixi
+
+After completing Pixi setup, follow the [Pixi RStudio integration guide](https://pixi.prefix.dev/latest/integration/editor/r_studio/)
+to launch RStudio from the activated Pixi environment.
