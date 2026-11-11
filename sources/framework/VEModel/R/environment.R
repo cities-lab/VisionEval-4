@@ -503,8 +503,23 @@ normalizePath <- function(
   elements <- unlist( lapply(
     strsplit(paths,split="[\\/]"),
     function(x) {
-      x[!nzchar(x)] <- "."
-      paste(x,collapse="/")
+      # strsplit() turns a leading separator into an empty first element: on
+      # POSIX systems "/Users/x" splits to c("","Users","x") while "C:/Users"
+      # splits to c("C:","Users").  Replacing every empty element with "." (as
+      # this helper used to do) therefore rewrote absolute POSIX paths as
+      # "./Users/x": they stopped looking absolute, and base::normalizePath()
+      # then left the non-existent ones untouched, so callers such as
+      # installModel()/openModel() got a path relative to the working directory.
+      # Count the leading separators, drop empty elements elsewhere, and put
+      # back the POSIX root ("/") or UNC prefix ("//").
+      if ( !length(x) ) return("") # empty path stays empty
+      lead <- 0L
+      while ( lead < length(x) && !nzchar(x[lead + 1L]) ) lead <- lead + 1L
+      rest <- x[seq_along(x) > lead]
+      rest <- rest[nzchar(rest)]   # drop redundant interior separators
+      value <- if ( length(rest) ) paste(rest,collapse="/") else "."
+      prefix <- if ( lead >= 2L ) "//" else if ( lead == 1L ) "/" else ""
+      paste0(prefix,value)
     }
   ) )
   RootDir <- RootDir[1]
