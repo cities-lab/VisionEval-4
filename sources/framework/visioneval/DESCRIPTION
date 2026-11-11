@@ -28,11 +28,11 @@ Imports:
     stringr,
     reshape2,
     sf,
-    rhdf5,
     knitr,
     futile.logger
 Suggests:
-    pkgload
+    pkgload,
+    rhdf5
 Encoding: UTF-8
 Roxygen: list(load='source')
 RoxygenNote: 7.2.3

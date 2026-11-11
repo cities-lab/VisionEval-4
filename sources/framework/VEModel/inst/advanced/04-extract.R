@@ -426,5 +426,12 @@ results$copy(test.dir,Flatten=FALSE,overwrite=TRUE) # exact copy of just what wa
 # Copy the Datastore, converting to another DatastoreType
 # Flatten is TRUE by default
 # This is a VERY slow operation...
-visioneval::initLog(Save=FALSE,Threshold="info")
-results$copy(test.dir,DatastoreType="H5",overwrite=TRUE)
+if (requireNamespace("rhdf5", quietly=TRUE)) {
+  visioneval::initLog(Save=FALSE,Threshold="info")
+  results$copy(test.dir,DatastoreType="H5",overwrite=TRUE)
+} else {
+  message(
+    "Skipping H5 datastore conversion example: install the optional package ",
+    "with BiocManager::install('rhdf5')."
+  )
+}

@@ -30,6 +30,7 @@ Suggests:
     knitr,
     pkgload,
     markdown,
+    rhdf5,
     RMariaDB
 Encoding: UTF-8
 RoxygenNote: 7.2.3

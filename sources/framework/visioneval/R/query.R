@@ -48,6 +48,7 @@ prepareForDatastoreQuery <- function(DstoreLocs_, DstoreType) {
              paste(AllowedDstoreTypes_, collapse = ", "), ".")
     stop(Msg,call.=FALSE)
   }
+  if (identical(DstoreType, "H5")) requireH5Support()
   Prep_ls$DstoreType <- DstoreType;
   #Check that DstoreLocs_ are correct and assign
   DstoreLocsExist_ <- sapply(DstoreLocs_, function(x) file.exists(x))

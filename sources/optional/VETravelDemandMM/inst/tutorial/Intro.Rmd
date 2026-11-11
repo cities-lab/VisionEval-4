@@ -11,6 +11,11 @@ vignette: >
 
 ## Overview
 
+The package's bundled test datastore uses the optional HDF5 backend. To run
+those tests or select `"DatastoreType": "H5"` in a model's
+`run_parameters.json`, install the Bioconductor package with
+`BiocManager::install("rhdf5")`. The default `RD` backend does not require it.
+
 The VETravelDemandMM module is a R package that implements a module for [the VisionEval framework](https://gregorbj.github.io/VisionEval/) to simulate multi-modal travel demand for individual households including:
 - Annual Average Daily VMT (AADVMT)
 - Transit trips and PMT

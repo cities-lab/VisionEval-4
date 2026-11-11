@@ -847,6 +847,14 @@ ve.results.copy <- function(ToDir, Flatten=TRUE, DatastoreType=NULL, overwrite=F
   if ( missing(ToDir) ) {
     stop(writeLog("Must provide target directory path.",Level="error"))
   }
+  source.type <- self$ModelState()$DatastoreType
+  target.type <- if (is.null(DatastoreType)) source.type else DatastoreType
+  if (identical(source.type, "H5") || identical(target.type, "H5")) {
+    # Validate before overwrite can remove an existing destination.
+    visioneval::assignDatastoreFunctions(
+      "H5", FunctionName="initDatastore", envir=self$ModelStateEnv
+    )
+  }
   if ( ( existing <- dir.exists(ToDir) ) && ! overwrite ) {
     stop(writeLog("ToDir exists: provide another ToDir or set overwrite=TRUE",Level="error"))
   } else if ( existing && overwrite ) {

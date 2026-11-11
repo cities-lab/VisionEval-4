@@ -19,8 +19,9 @@ Imports:
     rcmdcheck,
     roxygen2,
     withr,
-    BiocManager,
     miniCRAN
+Suggests:
+    BiocManager
 Encoding: UTF-8
 Collate: 
     'LoadBuildScripts.R'

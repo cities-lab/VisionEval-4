@@ -221,6 +221,18 @@ DatastoreFunctionNames <-
 #' @export
 getAllowedDstoreTypes <- function() c("RD", "H5")
 
+# HDF5 support is optional so RD datastore users do not need Bioconductor.
+requireH5Support <- function() {
+  if (!requireNamespace("rhdf5", quietly = TRUE)) {
+    stop(
+      "DatastoreType 'H5' requires the optional package 'rhdf5'. ",
+      "Install it with BiocManager::install('rhdf5').",
+      call. = FALSE
+    )
+  }
+  invisible(TRUE)
+}
+
 #ASSIGN DATASTORE INTERACTION FUNCTIONS
 #======================================
 #' Assign datastore interaction functions
@@ -253,6 +265,7 @@ assignDatastoreFunctions <- function(DstoreType=NULL, FunctionName=NULL, envir=m
     writeLog(c(Msg,"\nRecognized Types:",paste(getAllowedDstoreTypes(), collapse = ", ")),Level="error")
     stop(Msg)
   } else {
+    if (identical(DstoreType, "H5")) requireH5Support()
     DstoreFuncs_ <- lapply(
       paste0(DatastoreFunctionNames,DstoreType),
       function(x) return(
@@ -806,8 +819,8 @@ writeToTableRD <- function(Data_, Spec_ls, Group, Index = NULL, envir=modelEnvir
 #'   (see assignDatastoreFunctions)
 #' @return the datastore listing (invisibly) after writing to the model state file.
 #' @export
-#' @import rhdf5
 listDatastoreH5 <- function(envir=modelEnvironment()) {
+  requireH5Support()
   G <- getModelState(envir)
   dsPath <- file.path(G$ModelStatePath,G$DatastoreName)
 
@@ -862,8 +875,8 @@ listDatastoreH5 <- function(envir=modelEnvironment()) {
 #' listDatastore function which adds a listing of the datastore contents to the
 #' model state file.
 #' @export
-#' @import rhdf5
 initDatastoreH5 <- function(AppendGroups = NULL, envir=modelEnvironment()) {
+  requireH5Support()
   G <- getModelState(envir)
   dsPath <- file.path(G$ModelStatePath,G$DatastoreName)
   #If 'AppendGroups' is NULL initialize a new datastore
@@ -945,8 +958,8 @@ initDatastoreH5 <- function(AppendGroups = NULL, envir=modelEnvironment()) {
 #'   inventory in the model state file. The function will create any
 #'   missing Group as it creates the Table.
 #' @export
-#' @import rhdf5
 initTableH5 <- function(Table, Group, Length, envir=modelEnvironment()) {
+  requireH5Support()
   G <- getModelState(envir=envir)
   dsPath <- file.path(G$ModelStatePath,G$DatastoreName)
   NewTable <- paste(Group, Table, sep = "/")
@@ -980,8 +993,8 @@ initTableH5 <- function(Table, Group, Length, envir=modelEnvironment()) {
 #' exists the function throws an error and writes an error message to the log.
 #' Updates the model state file.
 #' @export
-#' @import rhdf5
 initDatasetH5 <- function(Spec_ls, Group, envir=modelEnvironment()) {
+  requireH5Support()
   G <- getModelState(envir)
   dsPath <- file.path(G$ModelStatePath,G$DatastoreName)
 
@@ -1061,8 +1074,8 @@ initDatasetH5 <- function(Spec_ls, Group, envir=modelEnvironment()) {
 #' @return A vector of the same type stored in the datastore and specified in
 #'   the TYPE attribute.
 #' @export
-#' @import rhdf5
 readFromTableH5 <- function(Name, Table, Group, Index = NULL, ReadAttr = TRUE, envir=modelEnvironment()) {
+  requireH5Support()
   #Expects to find the Datastore in the working directory
   #Load the model state file
   G <- getModelState(envir)
@@ -1140,8 +1153,8 @@ readFromTableH5 <- function(Name, Table, Group, Index = NULL, ReadAttr = TRUE, e
 #'   (see assignDatastoreFunctions)
 #' @return TRUE if data is sucessfully written. Updates model state file.
 #' @export
-#' @import rhdf5
 writeToTableH5 <- function(Data_, Spec_ls, Group, Index = NULL, envir=modelEnvironment()) {
+  requireH5Support()
   G <- getModelState(envir)
   dsPath <- file.path(G$ModelStatePath,G$DatastoreName)
   Name <- Spec_ls$NAME
@@ -2045,6 +2058,10 @@ copyDatastore <- function( ToDir, Flatten=TRUE, DatastoreType=NULL, envir=modelE
     writeLog(c(Msg,"\nRecognized Types:",paste(AllowedDstoreTypes_, collapse = ", ")),Level="error")
     stop(Msg)
    }
+
+  if (identical(DatastoreType, "H5") || identical(ModelState_ls$DatastoreType, "H5")) {
+    requireH5Support()
+  }
 
   paths <- character(0)
   success <- FALSE

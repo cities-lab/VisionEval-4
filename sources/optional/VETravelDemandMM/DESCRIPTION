@@ -23,6 +23,7 @@ Imports:
     visioneval
 Suggests:
     knitr,
+    rhdf5,
     VE2001NHTS,
     NHTS2009,
     SLD

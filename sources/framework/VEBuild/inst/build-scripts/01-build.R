@@ -342,17 +342,12 @@ ve.load.dependencies <- function(pkg.desc,debug=FALSE) {
   # Download and install the R package dependencies
   cat("\nLoading dependencies...\n")
   bld.env <- getBuildEnvironment() # as an environment for these commands, providing configured locations
-  support.packages <- c("BiocManager","desc","devtools","dplyr","miniCRAN","rcmdcheck","roxygen2","withr","gert","yaml")
+  support.packages <- c("desc","devtools","dplyr","miniCRAN","rcmdcheck","roxygen2","withr","gert","yaml")
   # We'll get some of these now, and ther est later
   if ( ! suppressWarnings(requireNamespace("dplyr",quietly=TRUE)) ) {
     # Used to easily assemble the dependencies into a single list of packages
     utils::install.packages("dplyr", lib=ve.lib, repos=CRAN.mirror, type=bld.env$build.type, quiet=TRUE )
     suppressWarnings(requireNamespace("dplyr",quietly=TRUE))
-  }
-  if ( ! suppressWarnings(requireNamespace("BiocManager",quietly=TRUE)) ) {
-    # The only current (early 2025) use of BioConductor is for the rhdf5 package. Does anyone still use HDF5?
-    utils::install.packages("BiocManager", lib=ve.lib, repos=CRAN.mirror, type=bld.env$build.type, quiet=TRUE )
-    suppressWarnings(requireNamespace("BiocManager",quietly=TRUE))
   }
   if ( ! suppressWarnings(requireNamespace("miniCRAN",quietly=TRUE)) ) {
     # Used to build local repository to support later building an offline installer
@@ -361,8 +356,9 @@ ve.load.dependencies <- function(pkg.desc,debug=FALSE) {
     # https://cran.r-project.org/web//packages/miniCRAN/vignettes/miniCRAN-introduction.html
   }
 
-  # BiocManager::repositories() will return appropriate download locations for this version of R
-  repos.online <- c(CRAN.mirror,BiocManager::repositories())
+  # Most dependencies are on CRAN. Add Bioconductor only when requested
+  # explicitly for HDF5 support, or when a required package is not on CRAN.
+  repos.online <- c(CRAN=CRAN.mirror)
 
   # Assemble a complete list of dependencies that are not currently being built
   # Mark out BaseR packages (even if explicitly listed, they will always be there)
@@ -371,12 +367,24 @@ ve.load.dependencies <- function(pkg.desc,debug=FALSE) {
   #   message("BaseR Packages:")
   #   print(pkgs.BaseR)
 
+  # H5 is an optional runtime feature. Set VE_INSTALL_HDF5=1 to include its
+  # Bioconductor dependency in a local VisionEval build.
+  install.hdf5 <- identical(Sys.getenv("VE_INSTALL_HDF5"), "1")
+
   # Add support.packages to the list in case no one else asks for them
   # That's needed if VEBuild (which has them as dependencies) is not itself being built
   pkg.deps <- unique(dplyr::bind_rows(lapply(pkg.desc,function(pkg) pkg$Dependencies), .id = "BuildPackage")$package)
   pkg.deps <- unique(c(support.packages,pkg.deps))
+  if (install.hdf5) pkg.deps <- unique(c(pkg.deps, "rhdf5"))
   pkg.deps <- pkg.deps[ ! pkg.deps %in% c(names(pkg.desc),pkgs.BaseR) ]
   # ignore any BaseR packages that were explicitly listed as dependencies
+  available.cran <- utils::available.packages(repos=repos.online,type=bld.env$build.type)[,"Package"] # will take a while...
+  if (install.hdf5 || any(!pkg.deps %in% available.cran)) {
+    if ( ! suppressWarnings(requireNamespace("BiocManager",quietly=TRUE)) ) {
+      utils::install.packages("BiocManager", lib=ve.lib, repos=CRAN.mirror, type=bld.env$build.type, quiet=TRUE )
+    }
+    repos.online <- c(repos.online, BiocManager::repositories())
+  }
   available.online <- utils::available.packages(repos=repos.online,type=bld.env$build.type)[,"Package"] # will take a while...
   available.online <- pkg.deps %in% available.online
   pkg.deps.online <- pkg.deps[ available.online ]

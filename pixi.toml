@@ -1,0 +1,78 @@
+[workspace]
+name = "visioneval-4"
+version = "4.0.0"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+
+[dependencies]
+r-base = "4.5.*"
+r-yaml = "*"
+r-gert = "*"
+r-desc = "*"
+r-devtools = "*"
+r-dplyr = "*"
+r-rcmdcheck = "*"
+r-roxygen2 = "*"
+r-withr = "*"
+r-minicran = "*"
+r-r6 = "*"
+r-stringr = "*"
+"r-futile.logger" = "*"
+r-jsonlite = "*"
+r-parallelly = "*"
+r-future = "*"
+"r-future.callr" = "*"
+r-dbi = "*"
+r-rsqlite = "*"
+"r-data.table" = "*"
+r-reshape2 = "*"
+r-sf = "*"
+r-knitr = "*"
+r-rjson = "*"
+r-ordinal = "*"
+r-geosphere = "*"
+r-fields = "*"
+r-plot3d = "*"
+r-tidycensus = "*"
+r-reshape = "*"
+r-purrr = "*"
+r-tidyr = "*"
+r-magrittr = "*"
+r-rlang = "*"
+r-httpuv = "*"
+r-stringi = "*"
+r-mime = "*"
+"r-r.utils" = "*"
+r-openssl = "*"
+r-mass = "*"
+
+[target.linux-64.dependencies]
+r-pscl = "*"
+
+[target.osx-64.dependencies]
+r-pscl = "*"
+
+[target.osx-arm64.dependencies]
+compilers = "*"
+
+[activation.env]
+R_LIBS_USER = "$PIXI_PROJECT_ROOT/.pixi/ve-library"
+R_PROFILE_USER = "$PIXI_PROJECT_ROOT/scripts/pixi-profile.R"
+
+[tasks.install]
+cmd = "Rscript --vanilla scripts/install-visioneval.R"
+env = { PIXI_FORCE_REINSTALL = "1" }
+
+[tasks.verify]
+cmd = "Rscript --vanilla scripts/verify-pixi.R"
+
+[tasks.rd-smoke]
+cmd = "Rscript --vanilla tests/scripts/test_optional_datastore.R"
+cwd = "sources/framework/visioneval"
+
+[tasks.r]
+cmd = "R --no-save --no-restore"
+
+[tasks.setup]
+cmd = "Rscript --vanilla scripts/verify-pixi.R"
+depends-on = ["install"]

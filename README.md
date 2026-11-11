@@ -60,6 +60,22 @@ source(ve.url<-"https://visioneval.github.io/assets/install/VE4-install.R")
 
 Currently, VisionEval will run on any R version in the 4.4.x or 4.5.x series.
 
+### Optional HDF5 datastore support
+
+VisionEval uses the `RD` datastore backend by default and does not require
+Bioconductor. To use the optional `H5` backend, first install its package in R:
+
+```R
+install.packages("BiocManager")
+BiocManager::install("rhdf5")
+```
+
+Then set `"DatastoreType": "H5"` in the model's `run_parameters.json`. If
+`rhdf5` is missing, VisionEval reports this requirement when H5 functionality
+is requested. Source builds that should include this optional dependency can
+set `VE_INSTALL_HDF5=1` in the build environment; ordinary builds use CRAN
+dependencies and only add Bioconductor when a required package needs it.
+
 **GORY DETAIL** The most up-to-date installer scripts can be found within the
 Github source tree in `sources/framework/VEStart/inst/download`, or within the
 `download` folder of the installed VEStart package, which you can locate with

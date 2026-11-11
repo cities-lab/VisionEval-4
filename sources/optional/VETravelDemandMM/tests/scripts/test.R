@@ -1,3 +1,10 @@
+# H5 fixture-based tests are optional because rhdf5 is an optional dependency.
+if (!requireNamespace("rhdf5", quietly = TRUE)) {
+  message(
+    "Skipping VETravelDemandMM datastore tests: install the optional H5 support ",
+    "with BiocManager::install('rhdf5') to run them."
+  )
+} else {
 #Test VETravelDemandMM module
 library(visioneval)
 if (!(require(VETravelDemandMM))) {
@@ -101,3 +108,5 @@ testModule(
    SaveDatastore = TRUE,
    DoRun = TRUE
  )
+
+}
