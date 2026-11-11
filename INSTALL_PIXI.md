@@ -17,6 +17,10 @@ or macOS 13 or newer.
 Use the repository's `release` branch, which contains the Pixi workflow described
 here.
 
+Choose one source option below: [clone with Git](#clone-with-git) or
+[download a ZIP](#download-a-zip). Complete only that option, then continue to
+[Install with Pixi](#install-with-pixi).
+
 ### Clone with Git
 
 Follow GitHub's guide to [clone a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository),
