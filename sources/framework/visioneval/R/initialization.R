@@ -618,6 +618,44 @@ getUnits <- function(Type_,envir=modelEnvironment()) {
 #getUnits("area")
 
 #==================
+#SELECT PACKAGE INITIALIZER
+#==========================
+# Select an initializer only when both its specification dataset and exported
+# module function are available. Prefer the package-specific naming convention,
+# but retain support for legacy packages that export Initialize and its specs.
+selectPackageInitializer <- function(PackageName, PackageData, PackageFunctions) {
+  candidates <- list(
+    list(Module = paste0("Initialize", PackageName),
+         Specifications = paste0("Initialize", PackageName, "Specifications")),
+    list(Module = "Initialize", Specifications = "InitializeSpecifications")
+  )
+
+  for (candidate in candidates) {
+    if (candidate$Specifications %in% PackageData &&
+        candidate$Module %in% PackageFunctions) {
+      return(candidate$Module)
+    }
+  }
+
+  declared <- vapply(candidates, function(candidate) {
+    candidate$Specifications %in% PackageData
+  }, logical(1))
+  if (any(declared)) {
+    declaredSpecs <- vapply(candidates[declared], `[[`, character(1), "Specifications")
+    expectedModules <- vapply(candidates[declared], `[[`, character(1), "Module")
+    stop(
+      "Package ", PackageName, " contains initializer specification dataset(s) ",
+      paste(declaredSpecs, collapse = ", "),
+      " but does not export a matching initializer function (",
+      paste(paste0(PackageName, "::", expectedModules), collapse = ", "),
+      "). Rebuild the package with its initializer function exported, or remove the orphaned specifications.",
+      call. = FALSE
+    )
+  }
+
+  NA_character_
+}
+
 #PARSE MODULE CALLS
 #==================
 #' parse the list of module calls from the ModelScriptFile
@@ -667,11 +705,12 @@ parseModuleCalls <- function( ModuleCalls_df, AlreadyInitialized=character(0), R
   # Results of Initialization in that case will already be in the Datastore
   for (Pkg in unique(setdiff(ModuleCalls_df$PackageName,AlreadyInitialized))) {
     PkgData <- data(package = Pkg)$results[,"Item"]
-    initName <- if ("InitializeSpecifications" %in% PkgData) {
-      "Initialize"
-    } else if ( paste0("Initialize",Pkg,"Specifications") %in% PkgData) {
-      paste0("Initialize",Pkg)
-    } else NA
+    candidateNames <- unique(c("Initialize", paste0("Initialize", Pkg)))
+    exportedNames <- intersect(candidateNames, getNamespaceExports(Pkg))
+    exportedFunctions <- exportedNames[vapply(exportedNames, function(name) {
+      is.function(getExportedValue(Pkg, name))
+    }, logical(1))]
+    initName <- selectPackageInitializer(Pkg, PkgData, exportedFunctions)
     if ( ! is.na(initName) ) {
       Add_df <-
       data.frame(

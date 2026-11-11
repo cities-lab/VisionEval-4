@@ -70,6 +70,10 @@ cmd = "Rscript --vanilla scripts/verify-pixi.R"
 cmd = "Rscript --vanilla tests/scripts/test_optional_datastore.R"
 cwd = "sources/framework/visioneval"
 
+# Focused filesystem test for the local source staging helper.
+[tasks.stage-smoke]
+cmd = "Rscript --vanilla scripts/test-stage-visioneval.R"
+
 [tasks.r]
 cmd = "R --no-save --no-restore"
 

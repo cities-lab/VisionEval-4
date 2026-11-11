@@ -107,6 +107,7 @@ while (length(pending)) {
 # would allow those writes to alter the user's checkout.
 Sys.setenv(VE_BUILD_RUNNING = "Yes")
 on.exit(Sys.unsetenv("VE_BUILD_RUNNING"), add = TRUE)
+sys.source(file.path(repo.root, "scripts", "stage-visioneval.R"), envir = environment())
 run.with.build.phase <- function(phase, code) {
   previous <- Sys.getenv("VE_BUILD_PHASE", unset = NA_character_)
   on.exit(if (is.na(previous)) Sys.unsetenv("VE_BUILD_PHASE") else Sys.setenv(VE_BUILD_PHASE = previous))
@@ -123,33 +124,7 @@ for (name in order) {
   }
 
   staged.path <- file.path(repo.root, ".pixi", "build", name)
-  if (dir.exists(staged.path)) unlink(staged.path, recursive = TRUE)
-  dir.create(staged.path, recursive = TRUE)
-  staged.files <- list.files(package$path, recursive = TRUE, all.files = TRUE,
-                             full.names = TRUE, include.dirs = TRUE, no.. = TRUE)
-  relative.paths <- substring(staged.files, nchar(package$path) + 2L)
-  for (i in seq_along(staged.files)) {
-    source.path <- staged.files[i]
-    target.path <- file.path(staged.path, relative.paths[i])
-    info <- file.info(source.path)
-    if (isTRUE(info$isdir)) {
-      dir.create(target.path, recursive = TRUE, showWarnings = FALSE)
-      next
-    }
-    dir.create(dirname(target.path), recursive = TRUE, showWarnings = FALSE)
-    if (!file.copy(source.path, target.path, overwrite = TRUE)) {
-      stop("Could not stage source file ", source.path)
-    }
-  }
-  # Some module source files generate package data while loading; keep that
-  # generated output confined to the disposable staging copy.
-  data.path <- file.path(staged.path, "data")
-  dir.create(data.path, showWarnings = FALSE)
-  estimated.path <- file.path(staged.path, "data-raw", "estimated")
-  if (dir.exists(estimated.path)) {
-    estimated.files <- list.files(estimated.path, full.names = TRUE)
-    if (length(estimated.files)) file.copy(estimated.files, data.path, overwrite = TRUE)
-  }
+  stageVisionevalPackage(package$path, staged.path)
   message("Generating NAMESPACE and installing ", name, " ", source.version)
   tryCatch({
     status <- run.with.build.phase("SAVE", system2(
